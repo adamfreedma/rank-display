@@ -48,8 +48,3 @@ class CocPlayer:
     get_warden = lambda self : self.data["heroes"][2]["level"]
 
     hero_sum = lambda self : self.get_king() + self.get_queen() + self.get_warden()
-
-
-player = CocPlayer("#90CVPR2RP")
-player.update_player_data()
-print(player.heroes_progress())
