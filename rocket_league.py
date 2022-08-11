@@ -16,7 +16,7 @@ def get_rank(player_id, playlist=None):
     conn = http.client.HTTPSConnection("rocket-league1.p.rapidapi.com")
 
     headers = {
-        'X-RapidAPI-Key': "8e72018a94msh4c3262c98201d33p111978jsn41062226b314",
+        'X-RapidAPI-Key': "?",
         'X-RapidAPI-Host': "rocket-league1.p.rapidapi.com"
     }
 
