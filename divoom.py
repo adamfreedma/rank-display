@@ -4,9 +4,7 @@ Pixoo
 """
 
 import socket
-from time import sleep
 from PIL import Image
-from binascii import unhexlify, hexlify
 from math import log10, ceil
 
 class Pixoo(object):
