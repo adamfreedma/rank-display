@@ -44,7 +44,8 @@ def main():
 
         if (curr_time - last_valorant_update) > VALORANT_UPDATE_PERIOD:
             new_game, valorant_kda = valorant_player.get_kda()
-
+            valorant_rank = valorant_player.get_rank()
+            
         if new_game:
             img = Image.open('background.png')
             draw = ImageDraw.Draw(img)
@@ -60,8 +61,11 @@ def main():
             filename = valorant_rank.lower().replace(' ', '')
             print("drawing", valorant_rank)
             pixoo.draw_pic("rank-images\\" + filename + ".png")
+        
+        if new_game:
+            pixoo.draw_pic("kda.png")
 
-        time.sleep(5)
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()
