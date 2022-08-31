@@ -29,8 +29,11 @@ class ValorantPlayer:
         res = conn.getresponse()
         data = json.loads(res.read())
         
-        return data["data"]["currenttierpatched"]
-
+        
+        try:
+            return data["data"]["currenttierpatched"]
+        except Exception:
+            return None
 
     def _get_game_stats(self):
         """returns the player's last valorant match stats
@@ -50,22 +53,24 @@ class ValorantPlayer:
         res = conn.getresponse()
         data = json.loads(res.read())
         
-        last_match = data["data"][0]
-        metadata =  last_match["metadata"]
+        try:
+            last_match = data["data"][0]
+            metadata =  last_match["metadata"]
 
-        if metadata["matchid"] == self.prev_matchID:
+            if metadata["matchid"] == self.prev_matchID:
+                return False, -1
+
+            self.prev_matchID = metadata["matchid"]
+            
+            all_players = last_match["players"]["all_players"]
+
+            for player in all_players:
+                if player["name"] == self.name and player["tag"] == self.tag:
+                    curr_player = player
+
+            return True, curr_player["stats"]
+        except Exception:
             return False, -1
-
-        self.prev_matchID = metadata["matchid"]
-        
-        all_players = last_match["players"]["all_players"]
-
-        for player in all_players:
-            if player["name"] == self.name and player["tag"] == self.tag:
-                curr_player = player
-
-        return True, curr_player["stats"]
-
 
     def get_kda(self):
 
