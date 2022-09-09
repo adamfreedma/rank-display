@@ -49,14 +49,26 @@ def main():
         #     coc_heroes_progress = coc_player.heroes_progress()
 
         if (curr_time - last_valorant_update) > VALORANT_UPDATE_PERIOD:
-            new_game, valorant_kda = valorant_player.get_kda()
+            valorant_player.update_match_stats()
+
+            valorant_win = valorant_player.get_win()
+
+            valorant_kda = valorant_player.get_kda()
             valorant_rank = valorant_player.get_rank()
             
-        if new_game:
+
+        if valorant_kda:
             img = Image.open('background.png')
             draw = ImageDraw.Draw(img)
             font = ImageFont.truetype(r'arial.ttf', 11)
             draw.text((0, 0), str(valorant_kda), fill=(int(100 / valorant_kda), int(100 *  valorant_kda), 0), font=font)
+            img.save("kda.png")
+            pixoo.cycle_set("kda", "kda.png")
+        else:
+            img = Image.open('background.png')
+            draw = ImageDraw.Draw(img)
+            font = ImageFont.truetype(r'arial.ttf', 11)
+            draw.text((0, 0), str(valorant_kda), fill=(int(255), int(0), 0), font=font)
             img.save("kda.png")
             pixoo.cycle_set("kda", "kda.png")
 
@@ -69,8 +81,9 @@ def main():
             print("drawing", valorant_rank)
             pixoo.cycle_set("valorant", "rank-images\\" + filename + ".png")
         
-        if new_game:
-            pixoo.push("kda.png", 20)
+        if valorant_player.new_game:
+            if valorant_win:
+                pixoo.push("win_screen.gif", 20)
 
         time.sleep(5)
 
