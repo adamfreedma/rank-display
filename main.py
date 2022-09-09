@@ -6,6 +6,7 @@ from PIL import Image
 from divoom_controller import DivoomController
 from PIL import Image, ImageDraw, ImageFont
 from threading import Thread
+import draw
 
 def main():
 
@@ -44,9 +45,9 @@ def main():
         if (curr_time - last_rl_update) > RL_UPDATE_PERIOD:
             rl_rank = rocket_league.get_rank(EPIC_ID)
         
-        # if (curr_time - last_coc_update) > COC_UPDATE_PERIOD:
-        #     coc_player.update_player_data()
-        #     coc_heroes_progress = coc_player.heroes_progress()
+        if (curr_time - last_coc_update) > COC_UPDATE_PERIOD:
+            coc_player.update_player_data()
+            coc_heroes_progress = coc_player.heroes_progress()
 
         if (curr_time - last_valorant_update) > VALORANT_UPDATE_PERIOD:
             valorant_player.update_match_stats()
@@ -57,28 +58,20 @@ def main():
             valorant_rank = valorant_player.get_rank()
             
 
-        if valorant_kda:
-            img = Image.open('background.png')
-            draw = ImageDraw.Draw(img)
-            font = ImageFont.truetype(r'arial.ttf', 11)
-            draw.text((0, 0), str(valorant_kda), fill=(int(100 / valorant_kda), int(100 *  valorant_kda), 0), font=font)
-            img.save("kda.png")
-            pixoo.cycle_set("kda", "kda.png")
-        else:
-            img = Image.open('background.png')
-            draw = ImageDraw.Draw(img)
-            font = ImageFont.truetype(r'arial.ttf', 11)
-            draw.text((0, 0), str(valorant_kda), fill=(int(255), int(0), 0), font=font)
-            img.save("kda.png")
-            pixoo.cycle_set("kda", "kda.png")
 
-        # print("valorant:", valorant_rank)
-        # print("rocket_league:", rl_rank)
-        # print("coc:", coc_heroes_progress)
+        if valorant_kda:
+            color = (int(100 / valorant_kda), int(100 *  valorant_kda), 0)
+        else:
+            color = (255, 0, 0)
+        draw.draw_text(valorant_kda, color, "kda.png")
+        pixoo.cycle_set("kda", "kda.png")
+
+        if coc_heroes_progress:
+            draw.draw_text(coc_heroes_progress, (255, 255, 255), "heroes.png", background_path="crown.png", starting_pos=(0, 5))
+            pixoo.cycle_set("coc", "heroes.png")
         
-        if(valorant_rank):
+        if valorant_rank:
             filename = valorant_rank.lower().replace(' ', '')
-            print("drawing", valorant_rank)
             pixoo.cycle_set("valorant", "rank-images\\" + filename + ".png")
         
         if valorant_player.new_game:
