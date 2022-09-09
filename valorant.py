@@ -11,6 +11,9 @@ class ValorantPlayer:
         self.tag = tag
         self.prev_matchID = ""
 
+        self.match_data = {}
+        self.new_game = False
+
 
     def get_rank(self):
         """returns a player's valorant rank
@@ -28,15 +31,14 @@ class ValorantPlayer:
 
         res = conn.getresponse()
         data = json.loads(res.read())
-        
-        
+
         try:
             return data["data"]["currenttierpatched"]
-        except Exception:
+        except KeyError:
             return None
 
-    def _get_game_stats(self):
-        """returns the player's last valorant match stats
+    def update_match_stats(self):
+        """update the player's valorant match history stats
 
         Args:
             name (str): player's name
@@ -46,38 +48,68 @@ class ValorantPlayer:
         Returns:
             bool, str: has a match occurred, player's kda
         """
+        if self.match_data:
+            self.prev_matchID = self.match_data[0]["metadata"]["matchid"]
+
+
         conn = http.client.HTTPSConnection("api.henrikdev.xyz")
 
         conn.request("GET", f"/valorant/v3/matches/eu/{self.name}/{self.tag}",)
 
         res = conn.getresponse()
         data = json.loads(res.read())
-        
+
+        try:        
+            self.match_data = data["data"]
+
+            self.new_game = self.match_data[0]["metadata"]["matchid"] != self.prev_matchID
+        except KeyError:
+            print(data)
+            pass
+
+    def _get_player(self, match_id=0):
+        """gets the player stats on a match
+
+        Args:
+            match_id (int): the match how many matches ago, (0 -> 0 match ago, 2 -> 2 matches ago)
+
+        Returns:
+            dictionary: player
+        """
         try:
-            last_match = data["data"][0]
-            metadata =  last_match["metadata"]
+            tracked_match = self.match_data[match_id]
+            metadata =  tracked_match["metadata"]
 
-            if metadata["matchid"] == self.prev_matchID:
-                return False, -1
-
-            self.prev_matchID = metadata["matchid"]
-            
-            all_players = last_match["players"]["all_players"]
+            all_players = tracked_match["players"]["all_players"]
 
             for player in all_players:
                 if player["name"] == self.name and player["tag"] == self.tag:
                     curr_player = player
 
-            return True, curr_player["stats"]
-        except Exception:
+            return curr_player
+        except KeyError:
             return False, -1
 
     def get_kda(self):
+        player = self._get_player()
 
-        ret, player_stats = self._get_game_stats()
+        player_stats = player["stats"]
 
-        if not ret:
-            return False, -1
+        return round(player_stats["kills"] / player_stats["deaths"], 1)
 
-        return True, round(player_stats["kills"] / player_stats["deaths"], 1)
+    def get_win(self, match_id=0):
+        """gets if the player won on a match
+
+        Args:
+            match_id (int): the match how many matches ago, (0 -> 0 match ago, 2 -> 2 matches ago)
+
+        Returns:
+            bool: did he win
+        """
+
+        player = self._get_player()
+
+        player_team = player["team"].lower()
+
+        return bool(self.match_data[match_id]["teams"][player_team]["has_won"])
 
