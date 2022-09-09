@@ -95,7 +95,10 @@ class ValorantPlayer:
 
         player_stats = player["stats"]
 
-        return round(player_stats["kills"] / player_stats["deaths"], 1)
+        try:
+            return round(player_stats["kills"] / player_stats["deaths"], 1)
+        except Exception:
+            return False
 
     def get_win(self, match_id=0):
         """gets if the player won on a match
@@ -111,5 +114,7 @@ class ValorantPlayer:
 
         player_team = player["team"].lower()
 
-        return bool(self.match_data[match_id]["teams"][player_team]["has_won"])
-
+        try:
+            return bool(self.match_data[match_id]["teams"][player_team]["has_won"])
+        except Exception:
+            return False
