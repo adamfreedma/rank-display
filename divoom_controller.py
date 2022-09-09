@@ -39,13 +39,21 @@ class DivoomController:
             if not self.picture_queue.empty():
                 path, duration = self.picture_queue.get()
 
-                self.pixoo.draw_pic(path)
+                if path.endswith(".gif"):
+                    self.pixoo.draw_gif(path)
+                else:
+                    self.pixoo.draw_pic(path)
                 print(duration)
                 time.sleep(duration)
 
             elif len(self.cycle) > 0:
                 path, duration = self.cycle_queue[self.cycle[self.cycle_index % len(self.cycle)]]
-                self.pixoo.draw_pic(path)
+                
+                if path.endswith(".gif"):
+                    self.pixoo.draw_gif(path)
+                else:
+                    self.pixoo.draw_pic(path)
+
                 self.cycle_index += 1
 
                 time.sleep(duration)
